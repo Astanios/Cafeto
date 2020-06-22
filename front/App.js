@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as AuthSession from "expo-auth-session";
 import jwtDecode from "jwt-decode";
-import { AsyncStorage, Alert, Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { AsyncStorage, Alert, Button, Platform, StyleSheet, TouchableHighlight } from "react-native";
 import LoginButton from "./components/loginbutton";
 import Home from "./screens/home";
 import Event from "./screens/event";
@@ -18,9 +18,20 @@ const useProxy = Platform.select({ web: false, default: true });
 const redirectUri = AuthSession.makeRedirectUri({ useProxy });
 
 const Stack = createStackNavigator();
+const layoutOptions = {
+  headerStyle: {
+    backgroundColor: 'rgba(12,6,63,0.91)',
+  },
+  headerTintColor: '#fff',
+  headerTitleStyle: {
+    fontWeight: 'bold',
+  },
+};
+
 
 export default function App() {
   const [name, setName] = React.useState(null);
+  const [jwt, setJwt] = React.useState(null);
   const [selected, setSelected] = React.useState(null);
   const [events, setEvents] = React.useState([
     {
@@ -53,6 +64,7 @@ export default function App() {
     },
     { authorizationEndpoint }
   );
+
 
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
@@ -87,7 +99,7 @@ export default function App() {
       }]
     }
   );
-  console.log(`Redirect URL: ${redirectUri}`);
+  //console.log(`Redirect URL: ${redirectUri}`);
 
   React.useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
@@ -124,6 +136,7 @@ export default function App() {
 
         const { name } = decoded;
         setName(name);
+        setJwt(jwtToken);
       }
     }
 
@@ -157,14 +170,16 @@ export default function App() {
       onPress={() => promptAsync({ useProxy })}
     />;
 
+  console.log(redirectUri);
   return (
-    <CafeProvider value={{ auth, events, setEvents, selected, setSelected }}>
+    <CafeProvider value={{ auth, events, setEvents, selected, setSelected, jwt, setJwt }}>
       <NavigationContainer>
         <Stack.Navigator>
-          {name ? (
+          {!name ? (
             <Stack.Screen
               name="Sign In"
               component={LoginButton}
+              options={{ ...layoutOptions }}
             />
           ) : (
               <>
@@ -173,40 +188,18 @@ export default function App() {
                   component={Home}
                   options={{
                     title: "Cafeto's events",
-                    headerStyle: {
-                      backgroundColor: 'rgba(12,6,63,0.91)',
-                    },
-                    headerTintColor: '#fff',
-                    headerTitleStyle: {
-                      fontWeight: 'bold',
-                    },
+                    ...layoutOptions
                   }}
                 />
                 <Stack.Screen
                   name="Event"
                   component={Event}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: 'rgba(12,6,63,0.91)',
-                    },
-                    headerTintColor: '#fff',
-                    headerTitleStyle: {
-                      fontWeight: 'bold',
-                    },
-                  }}
+                  options={{ ...layoutOptions }}
                 />
                 <Stack.Screen
                   name="Create"
                   component={NewEvent}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: 'rgba(12,6,63,0.91)',
-                    },
-                    headerTintColor: '#fff',
-                    headerTitleStyle: {
-                      fontWeight: 'bold',
-                    },
-                  }}
+                  options={{ ...layoutOptions }}
                 />
               </>
             )}

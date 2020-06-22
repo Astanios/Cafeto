@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FlatList, ScrollView, Text, TouchableHighlight, View } from 'react-native';
 
 import CafeContext from '../cafeContext'
@@ -6,7 +6,50 @@ import EventPreview from '../components/eventPreview';
 import styles from '../styles';
 
 const Home = ({ navigation }) => {
-    const { events } = useContext(CafeContext);
+    const { events, jwt } = useContext(CafeContext);
+    const [apiCall, setApiCall] = useState();
+    async function getMoviesFromApi() {
+        try {
+            let response = await fetch('https://reactnative.dev/movies.json');
+            let responseJson = await response.json();
+            return responseJson.movies;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    const getEventsFromApi = async () => {
+        try {
+            let response = await fetch('http://10.0.2.2:4000/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + jwt,
+                }
+            });
+            let responseJson = await response.json();
+            return responseJson.movies;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    useEffect(() => {
+        /*fetch('http://10.0.2.2:4000/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + jwt,
+            }
+        })
+            .then((response) => response)
+            .then((json) => setApiCall(json))
+            .catch((error) => console.error(error))
+            .finally(() => setLoading(false));*/
+        const aux1 = getMoviesFromApi(), aux2 = getEventsFromApi();
+
+        console.log('getMoviesFromApi: ', aux1);
+        console.log('getEventsFromApi: ', aux2);
+    }, []);
+    console.log('apiCall: ', apiCall);
     return (
         <View style={{ flex: 1, alignItems: 'center' }}>
             {!!events.length ? (
