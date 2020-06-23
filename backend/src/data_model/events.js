@@ -3,8 +3,10 @@ module.exports = (sequelize, DataTypes) => {
         name: {
             type: DataTypes.STRING
         },
-        ID: {
-            type: DataTypes.STRING
+        id: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+            autoIncrement: true
         },
         description: {
             type: DataTypes.TEXT
@@ -18,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         userId: {
             type: DataTypes.STRING,
             references: 'user',
-            referencesKey: 'ID'
+            referencesKey: 'id'
         },
         created_at: {
             type: DataTypes.DATE,

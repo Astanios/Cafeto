@@ -10,10 +10,16 @@
 
 // Dependencies
 const jwt = require('restify-jwt-community');
-
+const jwksRsa = require('jwks-rsa');
 // configure JWT to validate credential before execute request
 exports.JWT = jwt({
-  secret: process.env.SECRET_KEY,
+  //secret: process.env.SECRET_KEY, ///original way
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://cafetest.us.auth0.com/.well-known/jwks.json`
+  }),
   credentialsRequired: true,
   getToken: (req) => {
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {

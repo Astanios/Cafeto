@@ -32,17 +32,11 @@ const API = dependencyContainer.api;
  *
  * @return Dummy test response
  */
-apiRouter.get('/api/test', async (req, res) => {
-  try {
-    const result = await API.TestService.test();
-    res.send(result);
-  } catch (err) {
-    res.json(403, { error: err.message });
-  }
-});
 
+
+apiRouter.post('/user', events_controller.readCreate);
 apiRouter.get('/', events_controller.getAll);
-apiRouter.post('/create', events_controller.create);
+apiRouter.post('/', events_controller.create);
 apiRouter.get('/:id', events_controller.get);
 apiRouter.put('/:id', events_controller.update);
 apiRouter.del('/:id', events_controller.delete);

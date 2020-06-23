@@ -24,8 +24,8 @@ const port = process.env.SERVER_PORT || 3000;
 // Middlewares
 server.pre(cors.preflight);
 server.use(cors.actual);
-//server.use(jwt.JWT);
-//server.use(jwt.JWTErrorHandle);
+server.use(jwt.JWT);
+server.use(jwt.JWTErrorHandle);
 
 // Plugings
 server.use(restify.plugins.bodyParser());
