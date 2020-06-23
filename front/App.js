@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState, useReducer, useEffect, useMemo } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as AuthSession from "expo-auth-session";
 import jwtDecode from "jwt-decode";
-import { AsyncStorage, Alert, Button, Platform, StyleSheet, TouchableHighlight } from "react-native";
-import LoginButton from "./components/loginbutton";
+import { AsyncStorage, Alert, Button, Platform, Text, View } from "react-native";
 import Home from "./screens/home";
 import Event from "./screens/event";
 import NewEvent from "./screens/newEvent";
 import { CafeProvider } from "./cafeContext";
+import styles from "./styles";
 
 const auth0ClientId = "tA2jtuw4Hjq3kgdXQCGAfA7k4924o5lh";
 const authorizationEndpoint = "https://cafetest.us.auth0.com/authorize";
@@ -30,24 +30,10 @@ const layoutOptions = {
 
 
 export default function App() {
-  const [name, setName] = React.useState(null);
-  const [jwt, setJwt] = React.useState(null);
-  const [selected, setSelected] = React.useState(null);
-  const [events, setEvents] = React.useState([
-    {
-      name: 'Test name 1',
-      description: 'Test description 1',
-      picture: '../screens/landscape.jpg',
-      location: null
-    },
-    {
-      name: 'Test name 2',
-      description: 'Test description 2',
-      picture: '../screens/landscape.jpg',
-      location: null
-    },
-  ]);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [user, setUser] = useState(null);
+  const [jwt, setJwt] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [events, setEvents] = useState(null);
 
   const [request, result, promptAsync] = AuthSession.useAuthRequest(
     {
@@ -66,7 +52,7 @@ export default function App() {
   );
 
 
-  const [state, dispatch] = React.useReducer(
+  const [_, dispatch] = useReducer(
     (prevState, action) => {
       switch (action.type) {
         case 'RESTORE_TOKEN':
@@ -99,9 +85,8 @@ export default function App() {
       }]
     }
   );
-  //console.log(`Redirect URL: ${redirectUri}`);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
       let userToken;
@@ -133,16 +118,17 @@ export default function App() {
         // Retrieve the JWT token and decode it
         const jwtToken = result.params.id_token;
         const decoded = jwtDecode(jwtToken);
-
-        const { name } = decoded;
-        setName(name);
+        console.log(decoded);
+        const { name, sub } = decoded;
+        const id = sub.split('|')[1];
+        setUser({ id, name });
         setJwt(jwtToken);
       }
     }
 
   }, [result]);
 
-  const auth = React.useMemo(
+  const auth = useMemo(
     () => ({
       signIn: async data => {
         // In a production app, we need to send some data (usually username, password) to server and get a token
@@ -165,60 +151,61 @@ export default function App() {
     []
   );
   const LoginButton = () =>
-    <Button
-      title="Log in with Auth0"
-      onPress={() => promptAsync({ useProxy })}
-    />;
+    <View style={{
+      ...styles.center,
+      height: '100%'
+    }}
+    >
+      <Text
+        style={{ marginBottom: 20 }}
+      >
+        You need to login in order to access the app.
+      </Text>
+      <Button
+        title='Log in with Auth0'
+        color='#FB0C43'
+        onPress={() => promptAsync({ useProxy })}
+      />
+    </View>;
 
   console.log(redirectUri);
   return (
     <CafeProvider value={{ auth, events, setEvents, selected, setSelected, jwt, setJwt }}>
       <NavigationContainer>
         <Stack.Navigator>
-          {!name ? (
-            <Stack.Screen
-              name="Sign In"
-              component={LoginButton}
-              options={{ ...layoutOptions }}
-            />
+          {user ? (
+            <>
+              <Stack.Screen
+                name="Home"
+                component={Home}
+                options={{
+                  title: "Cafeto's events",
+                  ...layoutOptions
+                }}
+              />
+              <Stack.Screen
+                name="Event"
+                component={Event}
+                options={{ ...layoutOptions }}
+              />
+              <Stack.Screen
+                name="Create"
+                component={NewEvent}
+                options={{
+                  title: "Create event",
+                  ...layoutOptions
+                }}
+              />
+            </>
           ) : (
-              <>
-                <Stack.Screen
-                  name="Home"
-                  component={Home}
-                  options={{
-                    title: "Cafeto's events",
-                    ...layoutOptions
-                  }}
-                />
-                <Stack.Screen
-                  name="Event"
-                  component={Event}
-                  options={{ ...layoutOptions }}
-                />
-                <Stack.Screen
-                  name="Create"
-                  component={NewEvent}
-                  options={{ ...layoutOptions }}
-                />
-              </>
+              <Stack.Screen
+                name="Sign In"
+                component={LoginButton}
+                options={{ ...layoutOptions }}
+              />
             )}
         </Stack.Navigator>
       </NavigationContainer>
     </CafeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    textAlign: "center",
-    marginTop: 40,
-  },
-});

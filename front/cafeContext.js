@@ -7,7 +7,8 @@ const CafeContext = React.createContext({
     selected: null,
     setSelected: null,
     jwt: null,
-    setJwt: null
+    setJwt: null,
+    user: null
 });
 
 export const CafeProvider = CafeContext.Provider

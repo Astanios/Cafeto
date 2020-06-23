@@ -1,6 +1,17 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+    center: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 10
+    },
+    mapStyle: {
+        width: '80%',
+        height: Dimensions.get('window').height / 2,
+        borderColor: '#FB0C43',
+        borderWidth: 1,
+    },
     container: {
         flex: 1,
         paddingTop: 10,

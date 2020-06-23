@@ -1,17 +1,26 @@
-import React from 'react';
-import { ScrollView, Text, TouchableHighlight, View, Image } from 'react-native';
+import React, { useContext } from 'react';
+import { ScrollView, Text, TouchableHighlight, View, Image, StyleSheet, Dimensions } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import CafeContext from '../cafeContext'
 
 import styles from '../styles';
+
 const Event = ({ navigation }) => {
-    const { events, setEvents, selected } = React.useContext(CafeContext);
-    const { name, description } = selected !== null ? events[selected] : { name: null, description: null };
+    const { jwt, selected, user, setUpdate } = useContext(CafeContext);
+    let { name, description, position, username, userId, id } = selected;
     const handleRemove = async () => {
-        const aux = events.slice();//simplest way to clone an array, although what we'll do could be achieved through by directly operating in events, this would attempt against immutability principle, so it's better to just clone the array, process it and reasing it
-        aux.splice(selected, 1);
+        await fetch(`http://192.168.1.8:4000/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + jwt
+            }
+        });
+        setUpdate(true);
         navigation.navigate('Home');
-        await setEvents(aux);
+
     }
+    console.log(user, selected);
     return (
         <View style={{ flex: 1 }}>
             <ScrollView>
@@ -20,44 +29,50 @@ const Event = ({ navigation }) => {
                         {name}
                     </Text>
                     <Text style={styles.text} >
+                        Created by: {username}
+                    </Text>
+                    <Text style={styles.text} >
                         {description}
                     </Text>
                     <View View
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
+                        style={styles.center}
                     >
                         <Image
-                            source={require('./landscape.jpg')}
+                            source={require('../.gh-assets/landscape.jpg')}
                         />
                     </View>
                     <View View
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
+                        style={styles.center}
                     >
-                        <Image
-                            source={require('./landscape.jpg')}
-                        />
+                        <MapView
+                            style={styles.mapStyle}
+                        >
+
+                            <Marker
+                                coordinate={JSON.parse(position)}
+                                title='Event Location'
+                            />
+
+                        </MapView>
                     </View>
                 </View>
             </ScrollView>
-            <View style={styles.footer}>
-                <TouchableHighlight
-                    style={styles.footerButton}
-                    onPress={() => navigation.navigate('Create')}
-                >
-                    <Text style={styles.buttonText}>Edit Event</Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                    style={styles.footerButton}
-                    onPress={handleRemove}
-                >
-                    <Text style={styles.buttonText}>Remove Event</Text>
-                </TouchableHighlight>
-            </View>
+            {user.id === userId &&
+                <View style={styles.footer}>
+                    <TouchableHighlight
+                        style={styles.footerButton}
+                        onPress={() => navigation.navigate('Create')}
+                    >
+                        <Text style={styles.buttonText}>Edit Event</Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight
+                        style={styles.footerButton}
+                        onPress={handleRemove}
+                    >
+                        <Text style={styles.buttonText}>Remove Event</Text>
+                    </TouchableHighlight>
+                </View>
+            }
         </View>
     )
 }

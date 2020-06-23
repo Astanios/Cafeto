@@ -4,11 +4,11 @@ import styles from '../styles';
 import CafeContext from '../cafeContext'
 
 
-const EventPreview = ({ navigation, title, i, index }) => {
+const EventPreview = ({ navigation, item }) => {
     const { setSelected } = React.useContext(CafeContext);
 
     const handleClick = async () => {
-        await setSelected(index);
+        await setSelected(item);
         navigation.navigate('Event');
     };
     return (
@@ -20,11 +20,11 @@ const EventPreview = ({ navigation, title, i, index }) => {
                 <Text
                     style={styles.previewTitle}
                 >
-                    {title}
+                    {item.name}
                 </Text>
                 <Image
                     style={styles.previewImage}
-                    source={require('../screens/landscape.jpg')}
+                    source={require('../.gh-assets/landscape.jpg')}
                 />
             </View>
         </TouchableHighlight >
