@@ -1,4 +1,6 @@
 import React, { useState, useReducer, useEffect, useMemo } from 'react';
+
+import { useDispatch, useSelector } from "react-redux";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as AuthSession from "expo-auth-session";
@@ -9,6 +11,9 @@ import Event from "./screens/event";
 import NewEvent from "./screens/newEvent";
 import { CafeProvider } from "./cafeContext";
 import styles from "./styles";
+import store from "./store/store";
+import { Provider } from "react-redux";
+import { check_user } from "./store/actions/actions";
 
 const auth0ClientId = "tA2jtuw4Hjq3kgdXQCGAfA7k4924o5lh";
 const authorizationEndpoint = "https://cafetest.us.auth0.com/authorize";
@@ -34,7 +39,7 @@ export default function App() {
   const [jwt, setJwt] = useState(null);
   const [selected, setSelected] = useState(null);
   const [events, setEvents] = useState(null);
-
+  const action_dispatch = useDispatch();
   const [request, result, promptAsync] = AuthSession.useAuthRequest(
     {
       redirectUri,
@@ -123,6 +128,7 @@ export default function App() {
         const id = sub.split('|')[1];
         setUser({ id, name });
         setJwt(jwtToken);
+        action_dispatch(check_user(jwt, { id, name }));
       }
     }
 
@@ -170,42 +176,48 @@ export default function App() {
 
   console.log(redirectUri);
   return (
-    <CafeProvider value={{ auth, events, setEvents, selected, setSelected, jwt, setJwt }}>
-      <NavigationContainer>
-        <Stack.Navigator>
-          {user ? (
-            <>
-              <Stack.Screen
-                name="Home"
-                component={Home}
-                options={{
-                  title: "Cafeto's events",
-                  ...layoutOptions
-                }}
-              />
-              <Stack.Screen
-                name="Event"
-                component={Event}
-                options={{ ...layoutOptions }}
-              />
-              <Stack.Screen
-                name="Create"
-                component={NewEvent}
-                options={{
-                  title: "Create event",
-                  ...layoutOptions
-                }}
-              />
-            </>
-          ) : (
-              <Stack.Screen
-                name="Sign In"
-                component={LoginButton}
-                options={{ ...layoutOptions }}
-              />
-            )}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </CafeProvider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            {user ? (
+              <>
+                <Stack.Screen
+                  name="Home"
+                  component={Home}
+                  options={{
+                    title: "Cafeto's events",
+                    ...layoutOptions
+                  }}
+                />
+                <Stack.Screen
+                  name="Event"
+                  component={Event}
+                  options={{ ...layoutOptions }}
+                />
+                <Stack.Screen
+                  name="Create"
+                  component={NewEvent}
+                  options={{
+                    title: "Create event",
+                    ...layoutOptions
+                  }}
+                />
+              </>
+            ) : (
+                <Stack.Screen
+                  name="Sign In"
+                  component={LoginButton}
+                  options={{ ...layoutOptions }}
+                />
+              )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </Provider>
   );
 }
+
+/*
+    <CafeProvider value={{ auth, events, setEvents, selected, setSelected, jwt, setJwt }}>
+    </CafeProvider>
+
+*/
