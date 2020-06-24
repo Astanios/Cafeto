@@ -19,7 +19,6 @@ const Event = ({ navigation }) => {
         navigation.navigate('Home');
 
     }
-    //console.log(user, selected);
     return (
         <View style={{ flex: 1 }}>
             <ScrollView>

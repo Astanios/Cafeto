@@ -46,11 +46,9 @@ const NewEvent = ({ navigation }) => {
     };
 
     const postImage = async () => {
-        console.log('postImage');
         // ImagePicker saves the taken photo to disk and returns a local URI to it
         let localUri = image;
         let filename = localUri.split('/').pop();
-        console.log(filename);
         // Infer the type of the image
         let match = /\.(\w+)$/.exec(filename);
         let type = match ? `image/${match[1]}` : `image`;
@@ -68,7 +66,6 @@ const NewEvent = ({ navigation }) => {
 
             },
         });
-        console.log(JSON.stringify(res));
         return res;
     };
 
@@ -141,8 +138,6 @@ const NewEvent = ({ navigation }) => {
             } else {
                 await createEvent();
             }
-            console.log('uploadImage?', uploadImage);
-
             if (uploadImage)
                 await postImage();
             navigation.navigate('Home');

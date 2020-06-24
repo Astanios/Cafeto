@@ -19,10 +19,6 @@ const Home = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
             getAllEvents();
-            return () => {
-                // Do something when the screen is unfocused
-                // Useful for cleanup functions
-            };
         }, [])
     );
 

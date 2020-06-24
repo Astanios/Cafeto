@@ -65,9 +65,8 @@ apiRouter.post('/user', events_controller.readCreate);
 apiRouter.post('/image', upload.single('image'), function (req, res, next) {
   console.log('File upload service');
   console.log(req.file);
-  // req.file is the `avatar` file
-  // req.body will hold the text fields, if there were any
 });
+
 apiRouter.get('/', events_controller.getAll);
 apiRouter.post('/', events_controller.create);
 apiRouter.get('/:id', events_controller.get);
