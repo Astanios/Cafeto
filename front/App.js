@@ -29,7 +29,7 @@ const layoutOptions = {
 };
 
 
-export default function App() {
+const App = () => {
   const [user, setUser] = useState(null);
   const [jwt, setJwt] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -212,3 +212,4 @@ export default function App() {
     </CafeProvider>
   );
 }
+export default App;

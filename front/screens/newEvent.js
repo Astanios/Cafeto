@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Image, ScrollView, Text, TextInput, View, TouchableHighlight, Alert } from 'react-native';
-import ImagePicker from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 import MapView, { Marker } from 'react-native-maps';
+import Constants from 'expo-constants';
 
 import styles from '../styles';
 import CafeContext from '../cafeContext'
@@ -10,6 +11,7 @@ const NewEvent = ({ navigation }) => {
     const { jwt, selected, user } = useContext(CafeContext);
     const [image, setImage] = useState(null);
     const [update, setUpdate] = useState(true);
+    const [uploadImage, setUploadImage] = useState(false);
     const [eventName, setEventName] = useState('');
     const [eventDescription, setEventDescription] = useState('');
     const [location, setLocation] = useState({
@@ -26,6 +28,14 @@ const NewEvent = ({ navigation }) => {
             setEventDescription(selected.description.slice());
             setLocation(JSON.parse(selected.position));
         }
+        (async () => {
+            if (Constants.platform.ios) {
+                const { status } = await ImagePicker.requestCameraRollPermissionsAsync();
+                if (status !== 'granted') {
+                    alert('Sorry, we need camera roll permissions to make this work!');
+                }
+            }
+        })();
     });
 
     const composeEvent = {
@@ -33,6 +43,33 @@ const NewEvent = ({ navigation }) => {
         description: eventDescription,
         userId: user.id,
         location: JSON.stringify(location)
+    };
+
+    const postImage = async () => {
+        console.log('postImage');
+        // ImagePicker saves the taken photo to disk and returns a local URI to it
+        let localUri = image;
+        let filename = localUri.split('/').pop();
+        console.log(filename);
+        // Infer the type of the image
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+
+        // Upload the image using the fetch and FormData APIs
+        let formData = new FormData();
+        // Assume "photo" is the name of the form field the server expects
+        formData.append('photo', { uri: localUri, name: filename, type });
+        res = await fetch('http://192.168.1.8:4000/uploadfile', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': 'Bearer ' + jwt
+
+            },
+        });
+        console.log(JSON.stringify(res));
+        return res;
     };
 
     const createEvent = async () => {
@@ -69,15 +106,15 @@ const NewEvent = ({ navigation }) => {
 
     const _pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
             aspect: [4, 3],
+            quality: 1,
         });
-
-        alert(result.uri);
-        console.log(result)
 
         if (!result.cancelled) {
             setImage(result.uri);
+            setUploadImage(true);
         }
     };
 
@@ -104,6 +141,10 @@ const NewEvent = ({ navigation }) => {
             } else {
                 await createEvent();
             }
+            console.log('uploadImage?', uploadImage);
+
+            if (uploadImage)
+                await postImage();
             navigation.navigate('Home');
         }
     };
