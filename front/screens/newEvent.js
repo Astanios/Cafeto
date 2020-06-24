@@ -7,24 +7,33 @@ import styles from '../styles';
 import CafeContext from '../cafeContext'
 
 const NewEvent = ({ navigation }) => {
-    const { jwt, events, setEvents, selected, setSelected, user } = useContext(CafeContext);
+    const { jwt, selected, user } = useContext(CafeContext);
     const [image, setImage] = useState(null);
-    const [eventName, setEventName] = useState(selected.name.slice() || '');
-    const [eventDescription, setEventDescription] = useState(selected.description.slice() || '');
-    const [newCoordinate, setNewCoordinate] = useState(null);
+    const [update, setUpdate] = useState(true);
+    const [eventName, setEventName] = useState('');
+    const [eventDescription, setEventDescription] = useState('');
     const [location, setLocation] = useState({
         latitude: 51.5078788,
         longitude: -0.0877321,
         latitudeDelta: 0.009,
         longitudeDelta: 0.009
     });
+
     useEffect(() => {
-        return () => {
-            setSelected(null);
-        };
+        if (!!selected && update) {
+            setUpdate(false);
+            setEventName(selected.name.slice());
+            setEventDescription(selected.description.slice());
+            setLocation(JSON.parse(selected.position));
+        }
     });
 
-    const composeEvent = () => ({name: eventName, description: eventDescription, userId: user.id, location: newCoordinate});
+    const composeEvent = {
+        name: eventName,
+        description: eventDescription,
+        userId: user.id,
+        location: JSON.stringify(location)
+    };
 
     const createEvent = async () => {
         try {
@@ -34,7 +43,7 @@ const NewEvent = ({ navigation }) => {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + jwt
                 },
-                body: JSON.stringify(composeEvent())
+                body: JSON.stringify(composeEvent)
             });
             res = await res.json();
         } catch (e) {
@@ -44,13 +53,13 @@ const NewEvent = ({ navigation }) => {
 
     const updateEvent = async () => {
         try {
-            let res = await fetch(`http://192.168.1.8:4000/${newEvent.id}`, {
+            let res = await fetch(`http://192.168.1.8:4000/${selected.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + jwt
                 },
-                body: JSON.stringify(composeEvent())
+                body: JSON.stringify(composeEvent)
             });
             res = await res.json();
         } catch (e) {
@@ -77,11 +86,10 @@ const NewEvent = ({ navigation }) => {
 
     const handleMap = async ({ nativeEvent: { coordinate } }) => {
         await setLocation(coordinate);
-        await setNewEvent({ ...newEvent, location: JSON.stringify(coordinate) });
     };
 
     const handleSubmit = async () => {
-        if (!newEvent.name || !newEvent.description) {
+        if (!eventName || !eventDescription) {
             Alert.alert(
                 "Empty fields",
                 "Please, provide name and description of the event before submitting.",
@@ -92,19 +100,13 @@ const NewEvent = ({ navigation }) => {
 
         } else {
             if (selected !== null) {
-                const aux = events.slice();
-                aux[selected] = newEvent;
-                await setEvents(aux);
                 await updateEvent();
             } else {
-                //await setEvents([...events, newEvent]);
                 await createEvent();
             }
             navigation.navigate('Home');
-            await setSelected(null);
         }
     };
-    console.log('newEvent: ', composeEvent);
     return (
         <View style={{ flex: 1 }}>
             <ScrollView>

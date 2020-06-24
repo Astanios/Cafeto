@@ -1,16 +1,38 @@
-import React, { useContext, useEffect } from 'react';
-import { FlatList, Text, TouchableHighlight, View } from 'react-native';
-
+import React, { useContext, useEffect, useCallback } from 'react';
+import {
+    FlatList,
+    Text,
+    TouchableHighlight,
+    View
+} from 'react-native';
+import {
+    useFocusEffect,
+} from '@react-navigation/native';
 import CafeContext from '../cafeContext'
 import EventPreview from '../components/eventPreview';
 import styles from '../styles';
 
 const Home = ({ navigation }) => {
-    const { events, setEvents, jwt, user, setSelected, update, setUpdate } = useContext(CafeContext);
+    const { events, setEvents, jwt, user, setSelected } = useContext(CafeContext);
+    const abortController = new AbortController();
+
+    useFocusEffect(
+        useCallback(() => {
+            getAllEvents();
+            return () => {
+                // Do something when the screen is unfocused
+                // Useful for cleanup functions
+            };
+        }, [])
+    );
 
     useEffect(async () => {
-        console.log('HOME USE EFFECT HOOK');
-        const abortController = new AbortController()
+        checkUser();
+        return function cancel() {
+            abortController.abort()
+        }
+    }, []);
+    const getAllEvents = async () => {
         try {
             let res = await fetch('http://192.168.1.8:4000/', {
                 method: 'GET',
@@ -19,6 +41,15 @@ const Home = ({ navigation }) => {
                 },
                 signal: abortController.signal
             });
+            res = await res.json();
+            setEvents(res);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+    const checkUser = async () => {
+        try {
+            const abortController = new AbortController()
             let checkUser = await fetch('http://192.168.1.8:4000/user', {
                 method: 'POST',
                 headers: {
@@ -28,25 +59,15 @@ const Home = ({ navigation }) => {
                 body: JSON.stringify(user),
                 signal: abortController.signal
             });
-           setUpdate(false);
-
-            res = await res.json();
             checkUser = await checkUser.json();
-            setEvents(res);
         } catch (e) {
             console.error(e);
         }
-
-        return function cancel() {
-            abortController.abort()
-        }
-    }, [update]);
-
+    };
     const handleCreate = () => {
         setSelected(null);
         navigation.navigate('Create');
     };
-
     return (
         <View style={{ flex: 1, alignItems: 'center' }}>
             {events && events.length > 0 ? (

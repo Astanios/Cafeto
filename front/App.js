@@ -105,27 +105,30 @@ export default function App() {
     };
 
     bootstrapAsync();
+    const validateAuth = async () => {
+      if (result) {
+        if (result.error) {
+          Alert.alert(
+            "Authentication error",
+            result.params.error_description || "something went wrong"
+          );
+          return;
+        }
+        if (result.type === "success") {
+          // Retrieve the JWT token and decode it
+          const jwtToken = result.params.id_token;
+          const decoded = jwtDecode(jwtToken);
+          console.log("decoded: ", decoded);
+          console.log("jwt: ", jwtToken);
 
-    if (result) {
-      if (result.error) {
-        Alert.alert(
-          "Authentication error",
-          result.params.error_description || "something went wrong"
-        );
-        return;
-      }
-      if (result.type === "success") {
-        // Retrieve the JWT token and decode it
-        const jwtToken = result.params.id_token;
-        const decoded = jwtDecode(jwtToken);
-        console.log(decoded);
-        const { name, sub } = decoded;
-        const id = sub.split('|')[1];
-        setUser({ id, name });
-        setJwt(jwtToken);
+          const { name, sub } = decoded;
+          const id = sub.split('|')[1];
+          await setUser({ id, name });
+          await setJwt(jwtToken);
+        }
       }
     }
-
+    validateAuth();
   }, [result]);
 
   const auth = useMemo(
@@ -170,10 +173,10 @@ export default function App() {
 
   console.log(redirectUri);
   return (
-    <CafeProvider value={{ auth, events, setEvents, selected, setSelected, jwt, setJwt }}>
+    <CafeProvider value={{ auth, events, setEvents, selected, setSelected, jwt, setJwt, user }}>
       <NavigationContainer>
         <Stack.Navigator>
-          {user ? (
+          {user && !!jwt ? (
             <>
               <Stack.Screen
                 name="Home"

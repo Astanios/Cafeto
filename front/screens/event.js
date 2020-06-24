@@ -16,11 +16,10 @@ const Event = ({ navigation }) => {
                 'Authorization': 'Bearer ' + jwt
             }
         });
-        setUpdate(true);
         navigation.navigate('Home');
 
     }
-    console.log(user, selected);
+    //console.log(user, selected);
     return (
         <View style={{ flex: 1 }}>
             <ScrollView>
