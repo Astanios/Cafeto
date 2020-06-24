@@ -27,8 +27,8 @@ exports.get = function (req, res) {
 //UPDATE methods
 exports.update = function (req, res) {
     connection.query(
-        'UPDATE `events` SET `name`=?,`description`=?,`picture`=?,`position`=?, `updated_at`=? where `id`=?',
-        [req.body.name, req.body.description, req.body.picture, req.body.position, req.body.updated_at, req.body.id],
+        'UPDATE `events` SET `name`=?,`description`=?,`picture`=?,`position`=? where `id`=?',
+        [req.body.name, req.body.description, req.body.picture, req.body.location, req.params.id],
         function (error, results, fields) {
             if (error) throw error;
             res.end(JSON.stringify(results));
@@ -37,7 +37,6 @@ exports.update = function (req, res) {
 };
 
 exports.readCreate = function (req, res) {
-    console.log('readCreate', req.body);
     connection.query(
         'INSERT IGNORE users (username, id) VALUES (?,?)',
         [req.body.name, req.body.id],
@@ -47,6 +46,28 @@ exports.readCreate = function (req, res) {
         }
     );
 };
+
+exports.uploadImage = function (req, res) {
+    var img = fs.readFileSync(req.file.path);
+    var encode_image = img.toString('base64');
+    // Define a JSONobject for the image attributes for saving to database
+
+    var finalImg = {
+        contentType: req.file.mimetype,
+        image: new Buffer(encode_image, 'base64')
+    };
+    /*db.collection('mycollection').insertOne(finalImg, (err, result) => {
+        console.log(result)
+
+        if (err) return console.log(err)
+
+        console.log('saved to database')
+        res.redirect('/')
+
+
+    })*/
+};
+
 
 //CREATE method
 exports.create = function (req, res) {
