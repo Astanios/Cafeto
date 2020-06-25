@@ -69,7 +69,7 @@ const NewEvent = ({ navigation }) => {
             body: formData,
             headers: {
                 'Content-Type': 'multipart/form-data',
-                'Authorization': 'Bearer ' + jwt
+                'Authorization': `Bearer ${jwt}`
 
             },
         });
@@ -82,7 +82,7 @@ const NewEvent = ({ navigation }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + jwt
+                    'Authorization': `Bearer ${jwt}`
                 },
                 body: JSON.stringify(composeEvent)
             });

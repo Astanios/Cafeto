@@ -14,7 +14,7 @@ const Event = ({ navigation }) => {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + jwt
+                'Authorization': `Bearer ${jwt}`
             }
         });
         navigation.navigate('Home');

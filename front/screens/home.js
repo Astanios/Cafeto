@@ -51,7 +51,7 @@ const Home = ({ navigation }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + jwt
+                    'Authorization': `Bearer ${jwt}`
                 },
                 body: JSON.stringify(user),
                 signal: abortController.signal
