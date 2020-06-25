@@ -34,7 +34,7 @@ const Home = ({ navigation }) => {
             let res = await fetch(`${server}`, {
                 method: 'GET',
                 headers: {
-                    Authorization: 'Bearer ' + jwt
+                    Authorization: `Bearer ${jwt}`
                 },
                 signal: abortController.signal
             });
