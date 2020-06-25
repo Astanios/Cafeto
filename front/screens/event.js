@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { ScrollView, Text, TouchableHighlight, View, Image, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import CafeContext from '../cafeContext'
+import { server } from '../config';
 
 import styles from '../styles';
 
@@ -9,7 +10,7 @@ const Event = ({ navigation }) => {
     const { jwt, selected, user, setUpdate } = useContext(CafeContext);
     let { name, description, position, username, userId, id } = selected;
     const handleRemove = async () => {
-        await fetch(`http://192.168.1.8:4000/${id}`, {
+        await fetch(`${server}${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

@@ -6,12 +6,15 @@ import Constants from 'expo-constants';
 
 import styles from '../styles';
 import CafeContext from '../cafeContext'
+import { server } from '../config';
 
 const NewEvent = ({ navigation }) => {
     const { jwt, selected, user } = useContext(CafeContext);
     const [image, setImage] = useState(null);
     const [update, setUpdate] = useState(true);
     const [uploadImage, setUploadImage] = useState(false);
+    const [latitude, setLatitude] = useState(51.5078788);
+    const [longitude, setLongitude] = useState(-0.0877321);
     const [eventName, setEventName] = useState('');
     const [eventDescription, setEventDescription] = useState('');
     const [location, setLocation] = useState({
@@ -23,10 +26,14 @@ const NewEvent = ({ navigation }) => {
 
     useEffect(() => {
         if (!!selected && update) {
+            const position = JSON.parse(selected.position);
+            console.log(position);
             setUpdate(false);
             setEventName(selected.name.slice());
             setEventDescription(selected.description.slice());
             setLocation(JSON.parse(selected.position));
+            setLongitude(JSON.stringify(position["longitude"]));
+            setLatitude(JSON.stringify(position["latitude"]));
         }
         (async () => {
             if (Constants.platform.ios) {
@@ -57,7 +64,7 @@ const NewEvent = ({ navigation }) => {
         let formData = new FormData();
         // Assume "photo" is the name of the form field the server expects
         formData.append('photo', { uri: localUri, name: filename, type });
-        res = await fetch('http://192.168.1.8:4000/uploadfile', {
+        res = await fetch(`${server}uploadfile`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -71,7 +78,7 @@ const NewEvent = ({ navigation }) => {
 
     const createEvent = async () => {
         try {
-            let res = await fetch('http://192.168.1.8:4000/', {
+            let res = await fetch(`${server}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -87,7 +94,7 @@ const NewEvent = ({ navigation }) => {
 
     const updateEvent = async () => {
         try {
-            let res = await fetch(`http://192.168.1.8:4000/${selected.id}`, {
+            let res = await fetch(`${server}${selected.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -115,6 +122,8 @@ const NewEvent = ({ navigation }) => {
         }
     };
 
+    const handleLatitude = (e, attr) => setLatitude(e);
+    const handleLongitude = (e, attr) => setLongitude(e);
     const handleName = (e, attr) => setEventName(e);
     const handleDescription = (e, attr) => setEventDescription(e);
 
@@ -170,7 +179,32 @@ const NewEvent = ({ navigation }) => {
                         onChangeText={handleDescription}
                     />
                 </View>
-
+                <View
+                    style={styles.input}
+                >
+                    <TextInput
+                        style={{ height: 40 }}
+                        placeholder='Longitude'
+                        name='Longitude'
+                        multiline={true}
+                        numberOfLines={4}
+                        value={longitude}
+                        onChangeText={handleLongitude}
+                    />
+                </View>
+                <View
+                    style={styles.input}
+                >
+                    <TextInput
+                        style={{ height: 40 }}
+                        placeholder='Latitude'
+                        name='Latitude'
+                        multiline={true}
+                        numberOfLines={4}
+                        value={latitude}
+                        onChangeText={handleLatitude}
+                    />
+                </View>
                 <View style={styles.center}>
                     <TouchableHighlight
                         style={{ ...styles.footerButton, width: '80%' }}
@@ -192,7 +226,10 @@ const NewEvent = ({ navigation }) => {
                     >
 
                         <Marker
-                            coordinate={location}
+                            coordinate={{
+                                latitude: latitude,
+                                longitude: longitude
+                            }}
                             title='Event Location'
                         />
 

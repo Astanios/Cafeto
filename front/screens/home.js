@@ -11,6 +11,7 @@ import {
 import CafeContext from '../cafeContext'
 import EventPreview from '../components/eventPreview';
 import styles from '../styles';
+import { server } from '../config';
 
 const Home = ({ navigation }) => {
     const { events, setEvents, jwt, user, setSelected } = useContext(CafeContext);
@@ -30,7 +31,7 @@ const Home = ({ navigation }) => {
     }, []);
     const getAllEvents = async () => {
         try {
-            let res = await fetch('http://192.168.1.8:4000/', {
+            let res = await fetch(`${server}`, {
                 method: 'GET',
                 headers: {
                     Authorization: 'Bearer ' + jwt
@@ -46,7 +47,7 @@ const Home = ({ navigation }) => {
     const checkUser = async () => {
         try {
             const abortController = new AbortController()
-            let checkUser = await fetch('http://192.168.1.8:4000/user', {
+            let checkUser = await fetch(`${server}user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
