@@ -35,7 +35,7 @@
     "restify-cors-middleware": "1.1.1",
     "restify-jwt-community": "1.0.9",
     "restify-router": "0.5.1",
-    "sequelize": "4.42.0",
+    "sequelize": "6.3.5",
     "sequelize-cli": "5.4.0",
     "tcomb-form-native": "^0.6.20"
   },
